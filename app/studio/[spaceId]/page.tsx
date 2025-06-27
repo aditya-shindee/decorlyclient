@@ -1020,7 +1020,7 @@ export default function SpacePage() {
                           >
                             <div className="w-full h-full flex items-center justify-center">
                               <img
-                                src="/genimgplaceholder.png"
+                                src="https://xzecfauvsumzwqgquzga.supabase.co/storage/v1/object/public/static-images//genimgplaceholder.png"
                                 alt="Default room design"
                                 className="w-full h-full object-cover rounded-lg"
                                 onError={() => {
