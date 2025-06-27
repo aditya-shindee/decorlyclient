@@ -4,6 +4,16 @@ import React from 'react';
 import { Check } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+interface ProductCardProps {
+  id: string;
+  image_url: string;
+  title: string;
+  price: string;
+  link: string;
+  isSelected?: boolean;
+  onSelect?: (product: { id: string; title: string; image_url: string }) => void;
+}
+
 export function ProductCard({ id, image_url, title, price, link, isSelected = false, onSelect }: ProductCardProps) {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
 

@@ -20,6 +20,16 @@ import {
 } from "@/components/ui/hover-card";
 import '@/styles/scrollbar.css';
 
+// Add interface for ProductCardProps
+interface ProductCardProps {
+  id: string;
+  image_url: string;
+  title: string;
+  price: string;
+  link: string;
+  isSelected?: boolean;
+  onSelect?: (product: { id: string; title: string; image_url: string }) => void;
+}
 
 // Add custom styles for text clamping
 const styles = `
@@ -921,7 +931,7 @@ export default function SpacePage() {
                                   price={prod.price}
                                   link={prod.link}
                                   isSelected={isProductSelected(prod.id, cat.category)}
-                                  onSelect={(product) => handleProductSelect(product, cat.category)}
+                                  onSelect={(product: { id: string; title: string; image_url: string }) => handleProductSelect(product, cat.category)}
                                 />
                               </motion.div>
                             ))}
