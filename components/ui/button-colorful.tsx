@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { ArrowUpRight } from "lucide-react";
 
 interface ButtonColorfulProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-    label?: string;
+    label?: React.ReactNode;
 }
 
 export function ButtonColorful({
@@ -34,9 +34,15 @@ export function ButtonColorful({
 
             {/* Content */}
             <div className="relative flex items-center justify-center gap-2">
-                <span className="text-black font-semibold group-hover:text-black transition-colors">{label}</span>
-                <ArrowUpRight className="w-3.5 h-3.5 text-black group-hover:text-black transition-colors" />
+                {typeof label === 'string' ? (
+                    <>
+                        <span className="text-black font-semibold group-hover:text-black transition-colors">{label}</span>
+                        <ArrowUpRight className="w-3.5 h-3.5 text-black group-hover:text-black transition-colors" />
+                    </>
+                ) : (
+                    label
+                )}
             </div>
         </Button>
     );
-} 
+}
