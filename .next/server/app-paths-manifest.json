@@ -1,0 +1,19 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/auto-select/route": "app/api/auto-select/route.js",
+  "/api/create-spaces/route": "app/api/create-spaces/route.js",
+  "/api/deduct-credits/route": "app/api/deduct-credits/route.js",
+  "/api/generate-image/route": "app/api/generate-image/route.js",
+  "/api/get-credits/route": "app/api/get-credits/route.js",
+  "/api/get-spaces/route": "app/api/get-spaces/route.js",
+  "/api/product-search/route": "app/api/product-search/route.js",
+  "/api/webhook/clerk/route": "app/api/webhook/clerk/route.js",
+  "/page": "app/page.js",
+  "/pricing/page": "app/pricing/page.js",
+  "/sign-in/page": "app/sign-in/page.js",
+  "/sign-up/page": "app/sign-up/page.js",
+  "/sso-callback/page": "app/sso-callback/page.js",
+  "/studio/[spaceId]/page": "app/studio/[spaceId]/page.js",
+  "/studio/page": "app/studio/page.js",
+  "/verify-signup-link/page": "app/verify-signup-link/page.js"
+}
