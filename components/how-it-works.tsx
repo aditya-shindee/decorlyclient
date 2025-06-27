@@ -66,7 +66,6 @@ const StepContent: React.FC<StepContentProps> = ({ title, description, isActive 
   >
     <h3 className="text-3xl font-bold text-slate-800 mb-4">{title}</h3>
     <p className="text-gray-600 leading-relaxed mb-6">{description}</p>
-    <p className="text-sm text-gray-400 italic">*short description can be added here.</p>
   </div>
 );
 
