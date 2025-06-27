@@ -33,7 +33,7 @@ const galleryItems: GalleryCard[] = [
     id: 3,
     title: "Chef's Paradise",
     description: "Professional-grade kitchen with Italian marble and smart appliances",
-    image: "https://xzecfauvsumzwqgquzga.supabase.co/storage/v1/object/public/generated-images//93fac6a3-2108-4018-8b3e-2e4aed3a4f4c.png",
+    image: "https://xzecfauvsumzwqgquzga.supabase.co/storage/v1/object/public/static-images//kitchen.png",
     category: "Kitchen",
     size: 'medium',
     tags: ['Professional', 'Marble', 'Smart']
