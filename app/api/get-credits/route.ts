@@ -1,8 +1,8 @@
 import { supabase } from "@/lib/supabase";
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { saveError } from '@/lib/log-error';
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
     const { searchParams } = request.nextUrl;
     const userId = searchParams.get('userId');
