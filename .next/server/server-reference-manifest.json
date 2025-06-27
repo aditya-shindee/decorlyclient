@@ -1,1 +1,38 @@
-{"node":{"3249926a9f8ca4b5a7cda7a39a52d1cef544d5b1":{"workers":{"app/_not-found/page":"28513","app/page":"28513","app/pricing/page":"28513","app/sign-in/page":"28513","app/sign-up/page":"28513","app/sso-callback/page":"28513","app/studio/[spaceId]/page":"28513","app/studio/page":"28513","app/verify-signup-link/page":"28513"},"layer":{"app/_not-found/page":"rsc","app/page":"rsc","app/pricing/page":"rsc","app/sign-in/page":"rsc","app/sign-up/page":"rsc","app/sso-callback/page":"rsc","app/studio/[spaceId]/page":"rsc","app/studio/page":"rsc","app/verify-signup-link/page":"rsc"}},"7127e576e95a805f760beaff70c8fea381a7e689":{"workers":{"app/_not-found/page":"28513","app/page":"28513","app/pricing/page":"28513","app/sign-in/page":"28513","app/sign-up/page":"28513","app/sso-callback/page":"28513","app/studio/[spaceId]/page":"28513","app/studio/page":"28513","app/verify-signup-link/page":"28513"},"layer":{"app/_not-found/page":"rsc","app/page":"rsc","app/pricing/page":"rsc","app/sign-in/page":"rsc","app/sign-up/page":"rsc","app/sso-callback/page":"rsc","app/studio/[spaceId]/page":"rsc","app/studio/page":"rsc","app/verify-signup-link/page":"rsc"}},"7ea89355f8f9a857f1172511a790c77b3ba0178d":{"workers":{"app/_not-found/page":"28513","app/page":"28513","app/pricing/page":"28513","app/sign-in/page":"28513","app/sign-up/page":"28513","app/sso-callback/page":"28513","app/studio/[spaceId]/page":"28513","app/studio/page":"28513","app/verify-signup-link/page":"28513"},"layer":{"app/_not-found/page":"rsc","app/page":"rsc","app/pricing/page":"rsc","app/sign-in/page":"rsc","app/sign-up/page":"rsc","app/sso-callback/page":"rsc","app/studio/[spaceId]/page":"rsc","app/studio/page":"rsc","app/verify-signup-link/page":"rsc"}},"1f8d00d92d182790c4750ee6cbf18cf491380e36":{"workers":{"app/_not-found/page":"29160","app/page":"29160","app/pricing/page":"29160","app/sign-in/page":"29160","app/sign-up/page":"29160","app/sso-callback/page":"29160","app/studio/[spaceId]/page":"29160","app/studio/page":"29160","app/verify-signup-link/page":"29160"},"layer":{"app/_not-found/page":"action-browser","app/page":"action-browser","app/pricing/page":"action-browser","app/sign-in/page":"action-browser","app/sign-up/page":"action-browser","app/sso-callback/page":"action-browser","app/studio/[spaceId]/page":"action-browser","app/studio/page":"action-browser","app/verify-signup-link/page":"action-browser"}}},"edge":{},"encryptionKey":"W6D+eHfgB8466r9sPzXNedt3gL1qzfjFcgpdVuufLLo="}
+{
+  "node": {
+    "3249926a9f8ca4b5a7cda7a39a52d1cef544d5b1": {
+      "workers": {
+        "app/page": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2Fhome%2Fproject%2Fnode_modules%2F%40clerk%2Fnextjs%2Fdist%2Fesm%2Fapp-router%2Fkeyless-actions.js%22%2C%5B%22createOrReadKeylessAction%22%2C%22syncKeylessConfigAction%22%2C%22deleteKeylessAction%22%5D%5D%5D&__client_imported__=!"
+      },
+      "layer": {
+        "app/page": "rsc"
+      }
+    },
+    "7127e576e95a805f760beaff70c8fea381a7e689": {
+      "workers": {
+        "app/page": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2Fhome%2Fproject%2Fnode_modules%2F%40clerk%2Fnextjs%2Fdist%2Fesm%2Fapp-router%2Fkeyless-actions.js%22%2C%5B%22createOrReadKeylessAction%22%2C%22syncKeylessConfigAction%22%2C%22deleteKeylessAction%22%5D%5D%5D&__client_imported__=!"
+      },
+      "layer": {
+        "app/page": "rsc"
+      }
+    },
+    "7ea89355f8f9a857f1172511a790c77b3ba0178d": {
+      "workers": {
+        "app/page": "(rsc)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2Fhome%2Fproject%2Fnode_modules%2F%40clerk%2Fnextjs%2Fdist%2Fesm%2Fapp-router%2Fkeyless-actions.js%22%2C%5B%22createOrReadKeylessAction%22%2C%22syncKeylessConfigAction%22%2C%22deleteKeylessAction%22%5D%5D%5D&__client_imported__=!"
+      },
+      "layer": {
+        "app/page": "rsc"
+      }
+    },
+    "1f8d00d92d182790c4750ee6cbf18cf491380e36": {
+      "workers": {
+        "app/page": "(action-browser)/./node_modules/next/dist/build/webpack/loaders/next-flight-action-entry-loader.js?actions=%5B%5B%22%2Fhome%2Fproject%2Fnode_modules%2F%40clerk%2Fnextjs%2Fdist%2Fesm%2Fapp-router%2Fserver-actions.js%22%2C%5B%22invalidateCacheAction%22%5D%5D%5D&__client_imported__=true!"
+      },
+      "layer": {
+        "app/page": "action-browser"
+      }
+    }
+  },
+  "edge": {},
+  "encryptionKey": "ecvOeD/5tG2KqZ5icL8scZX+o0h/rU37mXRT/51i8sA="
+}
