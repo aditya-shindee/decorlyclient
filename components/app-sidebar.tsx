@@ -48,8 +48,8 @@ interface Space {
 
 const data = {navSecondary: [
     {
-      title: "Support",
-      url: "/support",
+      title: "Support (coming soon)",
+      url: "#",
       icon: LifeBuoy,
     }
 ]}
@@ -272,9 +272,6 @@ export function AppSidebar() {
                 router.push(`/pricing?ref=${encodeURIComponent(currentUrl)}`);
               }}>
                 <Coins className="mr-2 w-4 h-4" /> Buy Credits
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell className="mr-2 w-4 h-4" /> Notifications
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => {
