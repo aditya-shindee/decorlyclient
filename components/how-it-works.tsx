@@ -8,7 +8,7 @@ import {
   ImageComparison,
   ImageComparisonImage,
   ImageComparisonSlider,
-} from '@/components/image-comparison';
+} from '@/components/ui/image-comparison';
 
 // TYPE DEFINITIONS FOR THE "HOW IT WORKS" SECTION
 interface Step {
