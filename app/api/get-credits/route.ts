@@ -4,7 +4,7 @@ import { saveError } from '@/lib/log-error';
 
 export async function GET(request: Request) {
   try {
-    const { searchParams } = new URL(request.url);
+    const { searchParams } = request.nextUrl;
     const userId = searchParams.get('userId');
 
     if (!userId) {
@@ -32,9 +32,9 @@ export async function GET(request: Request) {
       console.error('Error fetching spaces:', spacesError);
       await saveError(
         'Spaces Fetch Error',
-        '/api/get-spaces',
+        '/api/get-credits',
         `Failed to fetch spaces for user ${userId}\n\n${JSON.stringify(spacesError)}`,
-        request.url
+        request.nextUrl.href
       );
       return NextResponse.json(
         { error: 'Failed to fetch spaces' },
@@ -47,9 +47,9 @@ export async function GET(request: Request) {
     console.error('Error in spaces API:', error);
     await saveError(
         'Spaces Fetch Exception Error',
-        '/api/get-spaces',
+        '/api/get-credits',
         `Failed to fetch spaces\n\n${JSON.stringify(error)}`,
-        request.url
+        request.nextUrl.href
     );
     return NextResponse.json(
       { error: 'Internal server error' },
