@@ -1,10 +1,11 @@
 import { supabase } from "@/lib/supabase";
 import { NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { saveError } from '@/lib/log-error';
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
+    const { searchParams } = request.nextUrl;
     const userId = searchParams.get('userId');
 
     if (!userId) {
@@ -34,7 +35,7 @@ export async function GET(request: Request) {
         'Spaces Fetch Error',
         '/api/get-spaces',
         `Failed to fetch spaces for user ${userId}\n\n${JSON.stringify(spacesError)}`,
-        request.url
+        request.nextUrl.href
       );
       return NextResponse.json(
         { error: 'Failed to fetch spaces' },
@@ -49,7 +50,7 @@ export async function GET(request: Request) {
         'Spaces Fetch Exception Error',
         '/api/get-spaces',
         `Failed to fetch spaces\n\n${JSON.stringify(error)}`,
-        request.url
+        request.nextUrl.href
     );
     return NextResponse.json(
       { error: 'Internal server error' },
