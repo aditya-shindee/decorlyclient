@@ -477,103 +477,131 @@ export default function SpacePage() {
     // Check if at least one product is selected from each category
     const categoriesWithProducts = productRecs.map(cat => cat.category);
     const selectedCategories = Array.from(new Set(selectedProducts.map(p => p.category)));
-    
     const missing = categoriesWithProducts.filter(cat => !selectedCategories.includes(cat));
-    
     if (missing.length > 0) {
       setMissingCategories(missing);
       setShowMissingProductsModal(true);
       return;
     }
 
-    // Check if user has at least 5 credits
     try {
       const creditResponse = await fetch(`/api/get-credits?userId=${supabaseUserId}`);
       const data = await creditResponse.json();
-      
       if (data.credits < 10) {
         setUserCredits(data.credits);
         setShowInsufficientCreditsModal(true);
         return;
       }
 
-      // Start image generation - show empty box immediately
       setIsGeneratingImage(true);
       setGeneratedImageUrl(null);
       setImageError(null);
 
-      // Make API call to generate image
-      try {
-        const payload = {
-          empty_room_image_url: space!.room_image_url,
-          room_type: space!.room_type,
-          user_id: supabaseUserId,
-          space_id: space!.id,
-          room_theme: space!.theme,
-          color_preference: space!.color_palette,
-          additional_instruction: space!.additional_instructions,
-          product_json: selectedProducts,
-          image_count: 1,
-          coordinates_required: true
-        };
+      const payload = {
+        empty_room_image_url: space!.room_image_url,
+        room_type: space!.room_type,
+        user_id: supabaseUserId,
+        space_id: space!.id,
+        room_theme: space!.theme,
+        color_preference: space!.color_palette,
+        additional_instruction: space!.additional_instructions,
+        product_json: selectedProducts,
+        image_count: 1,
+        coordinates_required: true
+      };
 
-        const imageResponse = await axios.post('/api/generate-image', payload);
-        
-        if (imageResponse.status === 200 && imageResponse.data.status === 'success') {
-          const imageUrl = imageResponse.data.response_data.generated_image_url;
-          const coordinate = imageResponse.data.response_data.coordinates;
-          setGeneratedImageUrl(imageUrl);
-          setCoordinates(coordinate);
-          
-          // Deduct credits after successful image generation
-          try {
-            const deductResponse = await fetch(`/api/deduct-credits?userId=${supabaseUserId}&amount=10`, {
-              method: 'POST'
-            });
-            
-            if (!deductResponse.ok) {
-              console.error('Failed to deduct credits');
-            } else {
-              const deductData = await deductResponse.json();
-              console.log('Credits deducted successfully:', deductData);
-            }
-          } catch (error) {
-            console.error('Error deducting credits:', error);
-          }
-          
-          // Insert a new row with current productRecs, selectedProducts, and generated image URL
-          try {
-            const { error: insertError } = await supabase
-              .from('space_info')
-              .insert({
-                space_id: space!.id,
-                user_id: supabaseUserId,
-                products: productRecs,
-                selected_products: selectedProducts,
-                generated_image_url: imageUrl,
-                coordinates: coordinate
-              });
+      const imageResponse = await axios.post('/api/generate-image', payload);
 
-            if (insertError) {
-              console.error('Error inserting new space_info record:', insertError);
-            }
-          } catch (err) {
-            console.error('Error inserting new space_info record:', err);
-          }
-        } else {
-          setImageError('Failed to generate image. Please try again.');
-        }
-      } catch (error) {
-        console.error('Error generating image:', error);
-        setImageError('Failed to generate image. Please try again.');
-      } finally {
+      if (imageResponse.status === 200 && imageResponse.data.job_id) {
+        pollGenerateImageJob(imageResponse.data.job_id);
+      } else {
         setIsGeneratingImage(false);
+        setImageError('Failed to start image generation. Please try again.');
       }
-      
     } catch (error) {
-      console.error('Error checking credits:', error);
-      setImageError('Error checking credits. Please try again.');
+      setIsGeneratingImage(false);
+      setImageError('Failed to start image generation. Please try again.');
+      console.error('Error generating image:', error);
     }
+  };
+
+  const pollGenerateImageJob = async (jobId: string) => {
+    const maxAttempts = 120; // 10 minutes with 5-second intervals
+    let attempts = 0;
+
+    const poll = async () => {
+      try {
+        const response = await fetch(`/api/job-status/${jobId}`);
+        const data = await response.json();
+
+        if (data.status === 'completed') {
+          setIsGeneratingImage(false);
+
+          if (data.result && data.result.status === 'success') {
+            const imageUrl = data.result.response_data.generated_image_url;
+            const coordinate = data.result.response_data.coordinates;
+            setGeneratedImageUrl(imageUrl);
+            setCoordinates(coordinate);
+
+            // Deduct credits after successful image generation
+            try {
+              const deductResponse = await fetch(`/api/deduct-credits?userId=${supabaseUserId}&amount=10`, {
+                method: 'POST'
+              });
+              if (!deductResponse.ok) {
+                console.error('Failed to deduct credits');
+              } else {
+                const deductData = await deductResponse.json();
+                console.log('Credits deducted successfully:', deductData);
+              }
+            } catch (error) {
+              console.error('Error deducting credits:', error);
+            }
+
+            // Insert a new row with current productRecs, selectedProducts, and generated image URL
+            try {
+              const { error: insertError } = await supabase
+                .from('space_info')
+                .insert({
+                  space_id: space!.id,
+                  user_id: supabaseUserId,
+                  products: productRecs,
+                  selected_products: selectedProducts,
+                  generated_image_url: imageUrl,
+                  coordinates: coordinate
+                });
+
+              if (insertError) {
+                console.error('Error inserting new space_info record:', insertError);
+              }
+            } catch (err) {
+              console.error('Error inserting new space_info record:', err);
+            }
+          } else {
+            setImageError('Failed to generate image. Please try again.');
+          }
+          return;
+        } else if (data.status === 'failed') {
+          setIsGeneratingImage(false);
+          setImageError(data.error_message || 'Image generation failed.');
+          return;
+        } else if (attempts >= maxAttempts) {
+          setIsGeneratingImage(false);
+          setImageError('Image generation timed out.');
+          return;
+        }
+
+        // Continue polling
+        attempts++;
+        setTimeout(poll, 5000); // Poll every 5 seconds
+      } catch (error) {
+        setIsGeneratingImage(false);
+        setImageError('Failed to check image generation status.');
+        console.error('Error polling generate image job status:', error);
+      }
+    };
+
+    poll();
   };
 
   // Add this function to handle product search with polling
