@@ -543,6 +543,190 @@ export default function SpacePage() {
     }
   };
 
+  // Add this function to handle product search with polling
+  const fetchProductsWithJob = async () => {
+    if (!space || !supabaseUserId) return;
+    
+    setProductsLoading(true);
+    
+    try {
+      // First check if we have existing data in space_info table
+      const { data: existingData, error: fetchError } = await supabase
+        .from('space_info')
+        .select('*')
+        .eq('space_id', space.id)
+        .eq('user_id', supabaseUserId)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (!fetchError && existingData) {
+        // We have existing data, use it
+        console.log('Using existing data from space_info table');
+        
+        if (existingData.products && Array.isArray(existingData.products)) {
+          setProductRecs(existingData.products);
+        }
+        
+        if (existingData.selected_products && Array.isArray(existingData.selected_products)) {
+          setSelectedProducts(existingData.selected_products);
+        }
+        
+        if (existingData.generated_image_url) {
+          setGeneratedImageUrl(existingData.generated_image_url);
+        }
+
+        if (existingData.coordinates) {
+          setCoordinates(existingData.coordinates);
+        }
+        
+        setProductsLoading(false);
+        return;
+      }
+
+      // No existing data found, create product search job
+      console.log('No existing data found, creating product search job');
+      const payload = {
+        empty_room_image_url: space.room_image_url,
+        room_type: space.room_type,
+        user_id: supabaseUserId,
+        space_id: space.id,
+        room_theme: space.theme,
+        color_preference: space.color_palette,
+        additional_instruction: space.additional_instructions,
+      };
+      
+      const res = await axios.post('/api/product-search', payload);
+      
+      if (res.status === 200 && res.data.job_id) {
+        // Start polling for product search job status
+        pollProductSearchJob(res.data.job_id);
+      } else {
+        throw new Error('Failed to create product search job');
+      }
+      
+    } catch (err) {
+      console.error('Error creating product search job:', err);
+      setProductsLoading(false);
+      
+      // Update space status to 'failed'
+      const { error: updateError } = await supabase
+        .from('spaces')
+        .update({ status: 'failed' })
+        .eq('id', space.id);
+        
+      if (updateError) {
+        console.error('Error updating space status to failed:', updateError);
+      }
+    }
+  };
+
+  const pollProductSearchJob = async (jobId: string) => {
+    const maxAttempts = 120; // 10 minutes with 5-second intervals
+    let attempts = 0;
+
+    const poll = async () => {
+      try {
+        const response = await fetch(`/api/job-status/${jobId}`);
+        const data = await response.json();
+
+        if (data.status === 'completed') {
+          // Job completed successfully
+          setProductsLoading(false);
+          
+          if (data.result && data.result.status === 'success') {
+            const productData = data.result.response_data.recommendations;
+            setProductRecs(productData);
+
+            // Deduct credits
+            try {
+              const deductResponse = await fetch(`/api/deduct-credits?userId=${supabaseUserId}&amount=15`, {
+                method: 'POST'
+              });
+              
+              if (!deductResponse.ok) {
+                console.error('Failed to deduct credits');
+              } else {
+                const deductData = await deductResponse.json();
+                console.log('Credits deducted successfully:', deductData);
+              }
+            } catch (error) {
+              console.error('Error deducting credits:', error);
+            }
+            
+            // Store the fetched data in space_info table
+            const { error: insertError } = await supabase
+              .from('space_info')
+              .insert({
+                space_id: space!.id,
+                user_id: supabaseUserId,
+                products: productData,
+                selected_products: [],
+                generated_image_url: null
+              });
+              
+            if (insertError) {
+              console.error('Error storing product data:', insertError);
+            }
+
+            // Update space status to 'completed'
+            const { error: updateError } = await supabase
+              .from('spaces')
+              .update({ status: 'completed' })
+              .eq('id', space!.id);
+              
+            if (updateError) {
+              console.error('Error updating space status to completed:', updateError);
+            }
+          }
+          
+          return;
+        } else if (data.status === 'failed') {
+          // Job failed
+          setProductsLoading(false);
+          console.error('Product search failed:', data.error_message);
+          
+          // Update space status to 'failed'
+          const { error: updateError } = await supabase
+            .from('spaces')
+            .update({ status: 'failed' })
+            .eq('id', space!.id);
+            
+          if (updateError) {
+            console.error('Error updating space status to failed:', updateError);
+          }
+          
+          return;
+        } else if (attempts >= maxAttempts) {
+          // Timeout
+          setProductsLoading(false);
+          console.error('Product search timed out');
+          
+          // Update space status to 'failed'
+          const { error: updateError } = await supabase
+            .from('spaces')
+            .update({ status: 'failed' })
+            .eq('id', space!.id);
+            
+          if (updateError) {
+            console.error('Error updating space status to failed:', updateError);
+          }
+          
+          return;
+        }
+
+        // Continue polling
+        attempts++;
+        setTimeout(poll, 5000); // Poll every 5 seconds
+      } catch (error) {
+        console.error('Error polling product search job status:', error);
+        setProductsLoading(false);
+      }
+    };
+
+    poll();
+  };
+
   useEffect(() => {
     async function getUserId() {
       if (isLoaded && isSignedIn && user) {
@@ -587,126 +771,7 @@ export default function SpacePage() {
     if (!space || !supabaseUserId || hasFetchedProducts.current) return;
     
     hasFetchedProducts.current = true;
-    if (!space || !supabaseUserId) return;
-    setProductsLoading(true);
-    
-    const fetchProducts = async () => {
-      try {
-        // First check if we have existing data in space_info table
-        const { data: existingData, error: fetchError } = await supabase
-          .from('space_info')
-          .select('*')
-          .eq('space_id', space.id)
-          .eq('user_id', supabaseUserId)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single();
-
-        if (!fetchError && existingData) {
-          // We have existing data, use it
-          console.log('Using existing data from space_info table');
-          
-          // Set product recommendations from stored data
-          if (existingData.products && Array.isArray(existingData.products)) {
-            setProductRecs(existingData.products);
-          }
-          
-          // Set selected products if they exist
-          if (existingData.selected_products && Array.isArray(existingData.selected_products)) {
-            setSelectedProducts(existingData.selected_products);
-          }
-          
-          // Set generated image URL if it exists
-          if (existingData.generated_image_url) {
-            setGeneratedImageUrl(existingData.generated_image_url);
-          }
-
-          // Set coordinates if they exist
-          if (existingData.coordinates) {
-            setCoordinates(existingData.coordinates);
-          }
-          
-          setProductsLoading(false);
-          return;
-        }
-
-        // No existing data found, fetch from backend API
-        console.log('No existing data found, fetching from backend API');
-        const payload = {
-          empty_room_image_url: space.room_image_url,
-          room_type: space.room_type,
-          user_id: supabaseUserId,
-          space_id: space.id,
-          room_theme: space.theme,
-          color_preference: space.color_palette,
-          additional_instruction: space.additional_instructions,
-        };
-        
-        const res = await axios.post('/api/product-search', payload);
-        
-        if (res.status === 200 && res.data.status === 'success') {
-          const productData = res.data.response_data.recommendations;
-
-          setProductRecs(productData);
-
-          try {
-            const deductResponse = await fetch(`/api/deduct-credits?userId=${supabaseUserId}&amount=15`, {
-              method: 'POST'
-            });
-            
-            if (!deductResponse.ok) {
-              console.error('Failed to deduct credits');
-            } else {
-              const deductData = await deductResponse.json();
-              console.log('Credits deducted successfully:', deductData);
-            }
-          } catch (error) {
-            console.error('Error deducting credits:', error);
-          }
-          
-          // Store the fetched data in space_info table for future use
-          const { error: insertError } = await supabase
-            .from('space_info')
-            .insert({
-              space_id: space.id,
-              user_id: supabaseUserId,
-              products: productData,
-              selected_products: [],
-              generated_image_url: null
-            });
-            
-          if (insertError) {
-            console.error('Error storing product data:', insertError);
-          }
-
-          // Update space status to 'completed' on successful API call
-          const { error: updateError } = await supabase
-            .from('spaces')
-            .update({ status: 'completed' })
-            .eq('id', space.id);
-            
-          if (updateError) {
-            console.error('Error updating space status to completed:', updateError);
-          }
-        }
-      } catch (err) {
-        console.error('Error fetching product recommendations:', err);
-        
-        // Update space status to 'failed' on API call failure
-        const { error: updateError } = await supabase
-          .from('spaces')
-          .update({ status: 'failed' })
-          .eq('id', space.id);
-          
-        if (updateError) {
-          console.error('Error updating space status to failed:', updateError);
-        }
-      } finally {
-        setProductsLoading(false);
-      }
-    };
-    
-    fetchProducts();
+    fetchProductsWithJob();
     
     // Cleanup function to reset the ref when space ID changes
     return () => {
