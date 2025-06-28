@@ -70,6 +70,16 @@ export const handler: Handler = async (event) => {
         });
         break;
         
+      case 'auto_select':
+        res = await axios.post(`${process.env.BACKEND_API_URL}/auto-select`, payload, {
+          headers: {
+            "X-User-ID": payload.user_id,
+            "Content-Type": "application/json",
+          },
+          timeout: 300000, // 5 minutes timeout
+        });
+        break;
+        
       default:
         throw new Error(`Unknown job type: ${jobType}`);
     }
