@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
 
     // Trigger the Netlify Background Function
     try {
-      const backgroundFunctionUrl = `${process.env.NETLIFY_URL}/.netlify/functions/process-background-job`;
+      const backgroundFunctionUrl = `${process.env.NETLIFY_URL}/.netlify/functions/process-background-job-background`;
       
       // Make a POST request to trigger the background function
       const response = await fetch(backgroundFunctionUrl, {
