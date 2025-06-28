@@ -895,7 +895,7 @@ export default function SpacePage() {
                   </motion.div>
                 ) : productRecs.length === 0 ? (
                   <div className="flex items-center justify-center h-full">
-                    <span className="text-gray-400">No products to recommend. Please click on support to get help.</span>
+                    <span className="text-gray-400">No products to recommend. Please click on admin to get help.</span>
                   </div>
                 ) : (
                   <motion.div 
