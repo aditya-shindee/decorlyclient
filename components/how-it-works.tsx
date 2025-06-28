@@ -142,11 +142,11 @@ const HowItWorksSection: React.FC<{ id: string }> = ({ id }) => {
       </svg>
       <div className="max-w-6xl mx-auto px-6 relative z-10">
         <div className="text-center max-w-2xl mx-auto mb-20">
-          <p className="text-sm font-semibold text-purple-600 uppercase tracking-widest">
+          <p className="text-sm font-semibold text-purple-600 uppercase tracking-widest mb-8">
             HOW IT WORKS
           </p>
-          <h2 className="mt-2 text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight">
-            Take a look at how we it is done
+          <h2 className="mt-2 text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight -mb-4">
+            Take a look at how it's done
           </h2>
         </div>
 
