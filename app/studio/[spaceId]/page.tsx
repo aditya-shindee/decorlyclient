@@ -372,7 +372,6 @@ export default function SpacePage() {
         prod_ids: category.products.map((product: any) => ({ id: product.id }))
       }));
 
-
       const payload = {
         room_type: space!.room_type,
         room_theme: space!.theme,
@@ -384,43 +383,77 @@ export default function SpacePage() {
         space_id: space!.id
       };
 
+      // Call the API to create the job
       const response = await axios.post('/api/auto-select', payload);
-      
-              if (response.status === 200 && response.data.status === 'success') {
-          const responseData = response.data.response_data;
-  
-          console.log(responseData);
-          // Map the response IDs back to full product info from productRecs
-          const newSelectedProducts: Array<{ id: string; title: string; image_url: string; category: string }> = [];
-          
-          // responseData is a flat array of objects with id property
-          responseData.forEach((responseProduct: any) => {
-            const productId = responseProduct.id;
-            
-            // Search through all categories in productRecs to find this product
-            for (const categoryData of productRecs) {
-              const fullProduct = categoryData.products.find((prod: any) => prod.id === productId);
-              if (fullProduct) {
-                newSelectedProducts.push({
-                  id: fullProduct.id,
-                  title: fullProduct.title,
-                  image_url: fullProduct.image_url,
-                  category: categoryData.category
-                });
-                break; // Found the product, no need to search other categories
-              }
-            }
-          });
-          
-          setSelectedProducts(newSelectedProducts);
-        }
+
+      if (response.status === 200 && response.data.job_id) {
+        // Start polling for job status
+        pollAutoSelectJob(response.data.job_id);
+      } else {
+        throw new Error('Failed to create auto-select job');
+      }
     } catch (error) {
       console.error('Error in auto select:', error);
-    } finally {
       setAutoSelectLoading(false);
     }
   };
-  
+
+  const pollAutoSelectJob = async (jobId: string) => {
+    const maxAttempts = 120; // 10 minutes with 5-second intervals
+    let attempts = 0;
+
+    const poll = async () => {
+      try {
+        const response = await fetch(`/api/job-status/${jobId}`);
+        const data = await response.json();
+
+        if (data.status === 'completed') {
+          setAutoSelectLoading(false);
+
+          if (data.result && data.result.status === 'success') {
+            const responseData = data.result.response_data;
+            // Map the response IDs back to full product info from productRecs
+            const newSelectedProducts: Array<{ id: string; title: string; image_url: string; category: string }> = [];
+            responseData.forEach((responseProduct: any) => {
+              const productId = responseProduct.id;
+              for (const categoryData of productRecs) {
+                const fullProduct = categoryData.products.find((prod: any) => prod.id === productId);
+                if (fullProduct) {
+                  newSelectedProducts.push({
+                    id: fullProduct.id,
+                    title: fullProduct.title,
+                    image_url: fullProduct.image_url,
+                    category: categoryData.category
+                  });
+                  break;
+                }
+              }
+            });
+            setSelectedProducts(newSelectedProducts);
+          }
+          return;
+        } else if (data.status === 'failed') {
+          setAutoSelectLoading(false);
+          console.error('Auto-select failed:', data.error_message);
+          return;
+        } else if (attempts >= maxAttempts) {
+          setAutoSelectLoading(false);
+          console.error('Auto-select timed out');
+          return;
+        }
+
+        // Continue polling
+        attempts++;
+        setTimeout(poll, 5000); // Poll every 5 seconds
+      } catch (error) {
+        setAutoSelectLoading(false);
+        console.error('Error polling auto-select job status:', error);
+      }
+    };
+
+    poll();
+  };
+
   const handleRemoveCategory = (categoryName: string) => {
     setCategoryToRemove(categoryName);
     setShowRemoveCategoryModal(true);
