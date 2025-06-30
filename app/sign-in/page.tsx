@@ -126,6 +126,16 @@ function SignInForm() {
             <p className="text-gray-600 mb-8">Login to your Decorly account</p>
           </div>
 
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
+            <h3 className="text-sm font-semibold text-gray-700 mb-2">Demo Account</h3>
+            <div className="bg-white border border-gray-200 rounded p-3">
+              <div className="font-mono text-sm text-gray-800">
+                <div>email:aditya12081998@gmail.com</div>
+                <div className="mt-1">password:bolt_hackathon</div>
+              </div>
+            </div>
+          </div>
+
           {error && (
             <Alert variant="destructive" className="mb-6 bg-red-50 border-red-200 text-red-700">
               <AlertDescription>{error}</AlertDescription>
